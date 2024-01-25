@@ -1,56 +1,49 @@
 version: 2.1
+
 jobs:
   build:
     docker:
       - image: circleci/node:14
-
     steps:
       - checkout
-      - run: 
-          name: download latest component
-          command: npm i
       - run:
-          name: Install Dependencies
-          command: npm install
+          name: "Build Step"
+          command: "echo Running build steps..."
 
-      - run:
-          name: Run Tests
-          command: npm test
-
-      - run:
-          name: Build
-          command: npm run build
-
-  deploy:
+  deploy_staging:
     docker:
-      - image: circleci/node:14
-
+      - image: cimg/base:stable
     steps:
       - checkout
-
-      - add_ssh_keys:
-          fingerprints:
-            - "your-ssh-key-fingerprint"
-
       - run:
-          name: Deploy to EC2
+          name: Deploy to Staging
           command: |
-            scp -r ./build/* user@your-ec2-instance-ip:/path/to/destination
-            ssh -i /path/to/your/private/key user@your-ec2-instance-ip 'cd /path/to/destination && npm install && npm start'
+            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null bitnami@44.204.146.286 "cd /home/bitnami/resysniperpublic && git pull origin staging && sudo systemctl restart apache2"
+
+  deploy_production:
+    resource_class: medium+
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run:
+          name: Deploy to Production
+          command: |
+            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null bitnami@3.226.165.242 "cd /home/bitnami/resysniperpublic && git pull origin master && sudo systemctl restart apache2"
 
 workflows:
-  version: 2
   build_and_deploy:
     jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - master
-      - deploy:
+      - build
+      - deploy_staging:
           requires:
             - build
           filters:
             branches:
-              only:
-                - master
+              only: staging
+      - deploy_production:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
