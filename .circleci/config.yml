@@ -18,18 +18,18 @@ jobs:
       - run:
           name: Deploy to Staging
           command: |
-            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@18.191.221.78 "cd /home/demo/ && git pull origin staging && sudo systemctl restart apache2"
+            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@18.191.221.78 "cd /home/ubuntu/demo/project_video_chat && git pull origin staging && sudo systemctl restart apache2"
 
   deploy_production:
     resource_class: medium+
     docker:
-      - image: cimg/base:stable
+      - image: circleci/node:14
     steps:
       - checkout
       - run:
           name: Deploy to Production
           command: |
-            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@18.191.221.78 "cd /home/bitnami/resysniperpublic && git pull origin master && sudo systemctl restart apache2"
+            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@18.191.221.78 "cd /home/ubuntu/demo/project_video_chat && git pull origin master && sudo systemctl restart apache2"
 
 workflows:
   build_and_deploy:
