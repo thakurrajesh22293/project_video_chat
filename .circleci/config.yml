@@ -6,10 +6,11 @@ jobs:
 
     steps:
       - checkout
-
+      - run: 
+          name: download latest component
+          command: npm i
       - run:
           name: Install Dependencies
-          command: npm i
           command: npm install
 
       - run:
