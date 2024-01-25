@@ -40,7 +40,7 @@ workflows:
             - build
           filters:
             branches:
-              only: staging
+              only: master 
       - deploy_production:
           requires:
             - build
